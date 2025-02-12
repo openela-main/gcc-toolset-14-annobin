@@ -8,8 +8,8 @@ BuildRequires: scl-utils-build
 
 Name:    %{?scl_prefix}annobin
 Summary: Annotate and examine compiled binary files
-Version: 12.70
-Release: 2%{?dist}
+Version: 12.88
+Release: 1%{?dist}
 License: GPL-3.0-or-later AND LGPL-2.0-or-later AND (GPL-2.0-or-later WITH GCC-exception-2.0) AND (LGPL-2.0-or-later WITH GCC-exception-2.0) AND GFDL-1.3-or-later
 URL: https://sourceware.org/annobin/
 # Maintainer: nickc@redhat.com
@@ -75,8 +75,8 @@ URL: https://sourceware.org/annobin/
 # Then once GTS-gcc is built and in the buildroot, reset this variable
 # to 0, bump the NVR and rebuild GTS-annobin.
 %define bootstrapping 0
-# FIXME: Temporary - use this to get the annobin plugin into the buildroot.
-%undefine _annotated_build
+# # FIXME: Temporary - use this to get the annobin plugin into the buildroot.
+# %%undefine _annotated_build
 
 #---------------------------------------------------------------------------------
 
@@ -564,7 +564,7 @@ rm -f %{_mandir}/man1/annocheck.1.gz
 # The first "make check" is run with "|| :" so that we can capture any logs
 # from failed tests.  The second "make check" is there so that the build
 # will fail if any of the tests fail.
-make check GCC=%gcc_for_annobin || :
+make check GCC=%gcc_for_annobin CC=%gcc_for_annobin || :
 if [ -f tests/test-suite.log ]; then
     cat tests/test-suite.log
 fi
@@ -573,7 +573,7 @@ fi
 #   uuencode tests/tmp_atexit/atexit.strip atexit.strip
 
 # Now repeat the tests so that we get the correct exit code.
-make check GCC=%gcc_for_annobin
+make check GCC=%gcc_for_annobin CC=%gcc_for_annobin 
 %endif
 
 #---------------------------------------------------------------------------------
@@ -635,6 +635,37 @@ make check GCC=%gcc_for_annobin
 #---------------------------------------------------------------------------------
 
 %changelog
+* Mon Feb 03 2025 Nick Clifton  <nickc@redhat.com> - 12.88-1
+- Annocheck: Look for -fstack-clash-protection in DW_AT_producer string.  (RHEL-77142)
+
+* Thu Aug 22 2024 Nick Clifton  <nickc@redhat.com> - 12.87-1
+- Rebase for GTS 14.1 release.  (RHEL-76929)
+- Annocheck: Fix locating string notes (again).  Add exception for glibc benchmark tests.  (RHEL-76456)
+- Annocheck: Add crtoffloadtableS.o to list of known gcc binaries.  (RHEL-760404)
+- Annocheck: Fix the --debug-dir option.
+- Annocheck: Fix corrupt warning message when unable to locate separate debug info files.
+- Annocheck: Remove spurious debugging messages.
+- Annocheck: Always look for annobin notes in separate debug info files.  (RHEL-75778)
+- Annocheck: Support multiple --debug-rpm and --debug-file options.  (RHEL-73349)
+- Annocheck: Add support for sys-root'ed glibc packages.  (RHEL-71296)
+- GCC Plugin: Tidy up use of gcc's diagnoatic headers.  (#32429)
+- Testsuite: Use configured compiler when running tests.
+- GCC Plugin: Fix building with gcc 15.  (#32429)
+- Annocheck: Fix overly long debug messages.
+- Annocheck: Rename rwx-seg test to load-segments.  Add more checks.  Add check for gaps as a future fail.
+- Annocheck: Add --no-allow-excpetions to disable exceptions for known special binaries.
+- Annocheck: Add --enable-future to enable future fail components in normal tests.
+- Annocheck: Fix bug preventing the inclusion of the rpm name in reports.
+- Annocheck: Add more exceptions for gcc binaries.  (RHEL-33365)
+- Annocheck: Add --skip-passes option.
+- Annocheck: Add exceptions for gcc binaries.  (RHEL-33365)
+- Annocheck: Skip property note test for i386 binaries created by LLVM.  (#2323797)
+- Annocheck: Skip FORTIFY and GLIBC_ASSERTIONS tests for LLVM produced binaries with unparseable DW_AT_producer attributes in their DWARF debug info.  (RHEL-65411)
+- GCC Plugin: Change type of the .annobin.notes section from SHT_STRTAB to SHT_PROGBITS.
+
+* Thu Aug 22 2024 Nick Clifton  <nickc@redhat.com> - 12.70-3
+- NVR Bump to allow rebuilding with annotation.
+
 * Tue Aug 13 2024 Nick Clifton  <nickc@redhat.com> - 12.70-2
 - Clang & LLVM Plugins: Remove buildroot from plugin install directory.  (RHEL-54178)
 
